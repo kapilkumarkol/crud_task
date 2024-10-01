@@ -18,10 +18,4 @@ This project is a Laravel-based RESTful API for managing a Todo List. It support
 - MySQL or any other database supported by Laravel
 - Postman (or similar tool) for API testing
 
-## Setup Instructions
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/your-repository.git
-cd your-repository
 
