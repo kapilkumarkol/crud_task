@@ -8,50 +8,130 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    public function task_list(Request $request){
-        try{
+    
+    public function task_list(Request $request)
+    {
+        try {
+            // Start with a Task query builder
+            $tasks = Task::query();
 
-            $tasks = Task::get();
-
+            // Apply the 'completed' filter if provided
             if ($request->has('completed')) {
                 $tasks->where('completed', $request->completed);
             }
 
-            // return view('task_list',get_defined_vars());
+            // Fetch the tasks (consider pagination for large datasets)
+            $tasks = $tasks->get();
 
-            return response()->json($tasks);
+            // Return the list of tasks in a JSON response
+            return response()->json([
+                'message' => 'Task list retrieved successfully.',
+                'tasks' => $tasks
+            ], 200);
 
-        }catch(Exception $e){
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            // Return a structured error response
+            return response()->json([
+                'message' => 'An error occurred while retrieving tasks.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
+        try {
+            // Validate the incoming request data
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+            ]);
 
-        $task = new Task();
-        $task->title = $request->title;
-        $task->description = $request->description;
-        $task->completed = "0";
-        $task->save();
-        $tasks = Task::all();
-        return response()->json($tasks, 201);
+            // Create a new task using mass assignment
+            $task = Task::create([
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'completed' => false, // Boolean false for completed status
+            ]);
+
+            // Return a JSON response with the newly created task and status 201
+            return response()->json([
+                'message' => 'Task created successfully.',
+                'task' => $task,
+            ], 201);
+
+        } catch (ValidationException $e) {
+            // Return a 422 response with validation error messages
+            return response()->json([
+                'message' => 'Validation error.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            // Handle any other unexpected errors
+            return response()->json([
+                'message' => 'An unexpected error occurred.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    public function show($id){
-        $task = Task::find($id);
-        return response()->json($task);
+
+    public function show($id)
+    {
+        try {
+            // Attempt to find the task by ID or fail with an exception
+            $task = Task::findOrFail($id);
+
+            // Return a successful JSON response with the task data
+            return response()->json([
+                'message' => 'Task retrieved successfully.',
+                'task' => $task,
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Return a 404 error if the task is not found
+            return response()->json([
+                'message' => 'Task not found.',
+            ], 404);
+        } catch (\Exception $e) {
+            // Handle any other unexpected errors
+            return response()->json([
+                'message' => 'An unexpected error occurred.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    public function delete_task($id){
-        $task = Task::findOrFail($id);
-        $task->delete();
-        return response()->json('success', 204);
+
+    public function delete_task($id)
+    {
+        try {
+            // Attempt to find the task by ID or fail with an exception
+            $task = Task::findOrFail($id);
+
+            // Delete the task
+            $task->delete();
+
+            // Return a 204 response to indicate the task was successfully deleted
+            return response()->json([
+                'message' => 'Task deleted successfully.'
+            ], 204);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Return a 404 error if the task is not found
+            return response()->json([
+                'message' => 'Task not found.',
+            ], 404);
+        } catch (\Exception $e) {
+            // Handle any other unexpected errors
+            return response()->json([
+                'message' => 'An unexpected error occurred.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+
 
     public function update(Request $request ,$id){
 
