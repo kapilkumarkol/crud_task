@@ -13,7 +13,7 @@ This project is a Laravel-based RESTful API for managing a Todo List. It support
 
 - PHP 8.2x or higher
 - Composer
-- Laravel 9.x or higher
+- Laravel 11.x or higher
 - MySQL database supported by Laravel
 - Postman (or similar tool) for API testing
 - please pass authentication token in post man to retrive data
