@@ -143,7 +143,7 @@ class TaskController extends Controller
             ]);
 
             $task = Task::findOrFail($id);
-            $task->update($request->only(['title', 'description']));
+            $task->update($request->only(['title', 'description','completed']));
             return response()->json([
                 'message' => 'Task updated successfully',
                 'task' => $task,
